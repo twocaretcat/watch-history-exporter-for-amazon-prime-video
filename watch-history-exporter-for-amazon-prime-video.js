@@ -149,11 +149,11 @@
 		const { y, m, d } = regex.exec(dateString).groups;
 
 		return new Date(
-			Number.parseInt(y),
+			Number.parseInt(y, 10),
 			isMonthNumeric
-				? Number.parseInt(m) - 1
+				? Number.parseInt(m, 10) - 1
 				: i18n.monthNames[m.toLowerCase()],
-			Number.parseInt(d),
+			Number.parseInt(d, 10),
 		);
 	};
 
@@ -175,6 +175,17 @@
 		return date.toISOString().split('T')[0];
 	};
 
+	// Escape spaces and string delimiters in a title
+	const escapeTitle = (title) =>
+		[
+			DELIMITER.string,
+			title.replaceAll(
+				DELIMITER.string,
+				`${DELIMITER.string}${DELIMITER.string}`,
+			),
+			DELIMITER.string,
+		].join('');
+
 	// Add a movie or episode to the array
 	const addItem = (
 		watchHistoryArray,
@@ -184,10 +195,8 @@
 	) => {
 		const isoDateWatchedString = toIsoDateString(dateWatchedString);
 		const mediaType = episodeTitle ? i18n.series : i18n.movie;
-		const formattedTitle = `${DELIMITER.string}${title}${DELIMITER.string}`;
-		const formattedEpisodeTitle = episodeTitle
-			? `${DELIMITER.string}${episodeTitle}${DELIMITER.string}`
-			: '';
+		const formattedTitle = escapeTitle(title);
+		const formattedEpisodeTitle = episodeTitle ? escapeTitle(episodeTitle) : '';
 
 		watchHistoryArray.push([
 			isoDateWatchedString,
@@ -303,7 +312,9 @@
 		const csvData = [columnNames, ...inputArray]
 			.map((item) => item.join(DELIMITER.field))
 			.join(DELIMITER.record);
-		const csvDataUrl = `data:text/csv;charset=utf-8,${encodeURIComponent(csvData)}`;
+		const csvDataUrl = `data:text/csv;charset=utf-8,${encodeURIComponent(
+			csvData,
+		)}`;
 
 		window.open(csvDataUrl);
 	};
