@@ -220,6 +220,10 @@
 			'div[data-automation-id=activity-history-items] > ul > li',
 		);
 
+		if (dateSections.length === 0) {
+			log('No watch history found', console.warn);
+		}
+
 		// Loop over date sections
 		for (const dateSection of dateSections) {
 			const mediaSections = dateSection.querySelectorAll('& > ul > li');
