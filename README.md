@@ -6,10 +6,10 @@
 
   <p class="projectBadges">
     <img src="https://johng.io/badges/category/Script.svg" alt="Project category" title="Project category">
-    <img src="https://img.shields.io/github/languages/top/jerboa88/watch-history-exporter-for-amazon-prime-video.svg" alt="Language" title="Language">
-    <img src="https://img.shields.io/github/repo-size/jerboa88/watch-history-exporter-for-amazon-prime-video.svg" alt="Repository size" title="Repository size">
+    <img src="https://img.shields.io/github/languages/top/twocaretcat/watch-history-exporter-for-amazon-prime-video.svg" alt="Language" title="Language">
+    <img src="https://img.shields.io/github/repo-size/twocaretcat/watch-history-exporter-for-amazon-prime-video.svg" alt="Repository size" title="Repository size">
     <a href="LICENSE">
-      <img src="https://img.shields.io/github/license/jerboa88/watch-history-exporter-for-amazon-prime-video.svg" alt="Project license" title="Project license"/>
+      <img src="https://img.shields.io/github/license/twocaretcat/watch-history-exporter-for-amazon-prime-video.svg" alt="Project license" title="Project license"/>
     </a>
   </p>
 
@@ -109,7 +109,7 @@ I appreciate the support!
 
 [watch-history-exporter-for-amazon-prime-video.js]: watch-history-exporter-for-amazon-prime-video.js
 [LICENSE]: LICENSE
-[create an issue]: https://github.com/jerboa88/watch-history-exporter-for-amazon-prime-video/issues
+[create an issue]: https://github.com/twocaretcat/watch-history-exporter-for-amazon-prime-video/issues
 [primevideo.com/settings/watch-history]: https://www.primevideo.com/settings/watch-history
 [Amazon Prime Video]: https://www.primevideo.com
 [this video]: https://youtu.be/X5uyCtVD1-o?si=AOrzgez90KiDlA-z&t=11
