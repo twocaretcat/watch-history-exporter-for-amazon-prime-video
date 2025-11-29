@@ -1,30 +1,25 @@
 <!-- Project Header -->
 <div align="center">
   <img class="projectLogo" src="screenshot.png" alt="Project logo" title="Project logo" width="512">
-
   <h1 class="projectName">Watch History Exporter for Amazon Prime Video</h1>
-
   <p class="projectBadges">
     <img src="https://johng.io/badges/category/Script.svg" alt="Project category" title="Project category">
     <img src="https://img.shields.io/github/languages/top/twocaretcat/watch-history-exporter-for-amazon-prime-video.svg" alt="Language" title="Language">
     <img src="https://img.shields.io/github/repo-size/twocaretcat/watch-history-exporter-for-amazon-prime-video.svg" alt="Repository size" title="Repository size">
-    <a href="LICENSE">
-      <img src="https://img.shields.io/github/license/twocaretcat/watch-history-exporter-for-amazon-prime-video.svg" alt="Project license" title="Project license"/>
-    </a>
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/twocaretcat/watch-history-exporter-for-amazon-prime-video.svg" alt="Project license" title="Project license"/></a>
   </p>
-
   <p class="projectDesc">
     A script to export your Amazon Prime Video watch history as a CSV file.
   </p>
-
   <br/>
 </div>
 
-
 ## 👋 About
+
 This script runs in your browser and allows you to save your watch history from [Amazon Prime Video] to a CSV file, where it can be processed further or imported into other platforms.
 
 ### Features
+
 - **⚡ Browser-based:** Run the script directly in your browser, no installation required
 - **📥 Detailed export:** Save your complete watch history as a CSV file with the following columns:
   - Date Watched
@@ -43,11 +38,10 @@ This script runs in your browser and allows you to save your watch history from 
   - 简体中文
   - 繁體中文
 
-
 ## 🕹️ Usage
+
 > [!CAUTION]
 > For security reasons, I do not recommend running scripts from the internet unless you understand what they are doing. If you are not a developer, I recommend reading the comments in the code and/or asking a LLM like [ChatGPT] to explain it to you.
->
 
 You can run the script by going to [primevideo.com/settings/watch-history], copying the code in [watch-history-exporter-for-amazon-prime-video.js], and pasting it into your browser's devtools console.
 
@@ -61,36 +55,64 @@ You can run the script by going to [primevideo.com/settings/watch-history], copy
   </ol>
 </details>
 
+## 🛟 Support
 
-## ❓ FAQ
+Need help? See the [support resources](https://github.com/twocaretcat/.github/blob/main/docs/SUPPORT.md) for information on how to:
 
-### Nothing shows up when I paste in the console / I get a warning when I try to paste in the console
-Some browsers prevent you from pasting code in the console because it could be malicious. This is called Paste Protection and you can read more about it on the [Chrome for Developers Blog].
+- request features
+- report bugs
+- ask questions
+- report security vulnerabilities
 
-If this happens, follow the instructions in the console to re-enable pasting, and then try again. For Chrome, the following steps should work:
- 1. Try to paste something in the console. You should get a warning message about pasting
- 2. Type "allow pasting" in the console and press enter
+### FAQ
 
- See [this video] for a visual walkthrough.
+<details>
+  <summary><b>Nothing shows up when I paste in the console / I get a warning when I try to paste in the console</b></summary><br/>
 
-### I get an `Uncaught SyntaxError: Unexpected identifier` error when running the script
-Make sure that you select the entire file with <kbd>Ctrl</kbd> + <kbd>A</kbd> when copying it. If part of the script is cut off, it won't work.
+  Some browsers prevent you from pasting code in the console because it could be malicious. This is called Paste Protection and you can read more about it on the [Chrome for Developers Blog].
 
-### The script runs, but I am not prompted to save a file
-If you have a default download folder set, check if the file is there.
+  If this happens, follow the instructions in the console to re-enable pasting, and then try again. For Chrome, the following steps should work:
 
-Otherwise, make sure "Pop-ups and redirects" and "Automatic downloads" are enabled for www.primevideo.com in your browser settings.
+  1. Try to paste something in the console. You should get a warning message about pasting
+  2. Type "allow pasting" in the console and press enter
 
+  See [this video] for a visual walkthrough.
+
+</details>
+
+<details>
+  <summary><b>I get an <code>Uncaught SyntaxError: Unexpected identifier</code> error when running the script</b></summary><br/>
+
+  Make sure that you select the entire file with <kbd>Ctrl</kbd> + <kbd>A</kbd> when copying it. If part of the script is cut off, it won't work.
+
+</details>
+
+<details>
+  <summary><b>The script runs, but I am not prompted to save a file</b></summary><br/>
+
+  If you have a default download folder set, check if the file is there.
+
+  Otherwise, make sure "Pop-ups and redirects" and "Automatic downloads" are enabled for <www.primevideo.com> in your browser settings.
+
+</details>
 
 ## 🤝 Contributing
-If you encounter any problems with the script, feel free to [create an issue].
 
-Pull requests, bug reports, translations, and other kinds of contributions are greatly appreciated. By contributing code, you agree to waive all claim of copyright to your work and release it to the public domain.
+Want to help out? Pull requests are welcome for:
 
+- feature implementations
+- bug fixes
+- translations
+- documentation
+- tests
+
+See the [contribution guide](../../contribute) for more details.
 
 ## 🧾 License
-This project is released into the public domain. See the [LICENSE] for details. Attribution is appreciated but not required :)
 
+Copyright © 2025 [John Goodliff](https://johng.io/r/watch-history-exporter-for-amazon-prime-video) ([@twocaretcat](https://github.com/twocaretcat)).
+
+This project is released into the public domain (attribution is appreciated but not required 🙂). See the [license](LICENSE) for details.
 
 ## 💕 Funding
 
@@ -106,10 +128,7 @@ If you can't donate but still want to contribute, don't worry. There are many ot
 
 I appreciate the support!
 
-
 [watch-history-exporter-for-amazon-prime-video.js]: watch-history-exporter-for-amazon-prime-video.js
-[LICENSE]: LICENSE
-[create an issue]: https://github.com/twocaretcat/watch-history-exporter-for-amazon-prime-video/issues
 [primevideo.com/settings/watch-history]: https://www.primevideo.com/settings/watch-history
 [Amazon Prime Video]: https://www.primevideo.com
 [this video]: https://youtu.be/X5uyCtVD1-o?si=AOrzgez90KiDlA-z&t=11
