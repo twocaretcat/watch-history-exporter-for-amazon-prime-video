@@ -1,5 +1,8 @@
 (async () => {
-	// Delimiters for the CSV file
+	/** When true, format epoch ms into "yyyy-mm-dd hh:mm:ss.000". Otherwise, output the raw epoch milliseconds value */
+	const FORMAT_DATES = false;
+
+	/** Delimiters for the CSV file */
 	const DELIMITER = {
 		string: '"',
 		field: ',',
@@ -13,12 +16,6 @@
 		series: 'Serie',
 		title: 'Título',
 		type: 'Tipo',
-		parseDateString: (dateString) =>
-			parseDateString(
-				dateString,
-				// ex. 23 de abril de 2024
-				/(?<d>\d{1,2}) de (?<m>[a-zA-Z]+) de (?<y>\d{4})/,
-			),
 	};
 
 	const I18N_COMMON_PT = {
@@ -28,12 +25,6 @@
 		series: 'Série',
 		title: 'Título',
 		type: 'Tipo',
-		parseDateString: (dateString) =>
-			parseDateString(
-				dateString,
-				// ex. 23 de Abril de 2024
-				/(?<d>\d{1,2}) de (?<m>[a-zA-Zç]+) de (?<y>\d{4})/,
-			),
 	};
 
 	const I18N_COMMON_ZH = {
@@ -43,16 +34,9 @@
 		series: '劇集系列',
 		title: '標題',
 		type: '類型',
-		parseDateString: (dateString) =>
-			parseDateString(
-				dateString,
-				// ex. 2024年4月23日
-				/(?<y>\d{4})年(?<m>\d{1,2})月(?<d>\d{1,2})日/,
-				true,
-			),
 	};
 
-	// Locale-specific strings and functions
+	/** Locale-specific strings and functions */
 	const I18N = {
 		'de-de': {
 			date_watched: 'Datum angesehen',
@@ -61,12 +45,6 @@
 			series: 'Serie',
 			title: 'Titel',
 			type: 'Typ',
-			parseDateString: (dateString) =>
-				// ex. 23. April 2024
-				parseDateString(
-					dateString,
-					/(?<d>\d{1,2})\. (?<m>[a-zA-Zä]+) (?<y>\d{4})/,
-				),
 		},
 		'en-us': {
 			date_watched: 'Date Watched',
@@ -75,8 +53,6 @@
 			series: 'Series',
 			title: 'Title',
 			type: 'Type',
-			// ex. April 23, 2024
-			parseDateString: (dateString) => new Date(dateString),
 		},
 		'es-419': I18N_COMMON_ES,
 		'es-es': {
@@ -90,12 +66,6 @@
 			series: 'Série',
 			title: 'Titre',
 			type: 'Type',
-			parseDateString: (dateString) =>
-				parseDateString(
-					dateString,
-					// ex. 23 avril 2024
-					/(?<d>\d{1,2}) (?<m>[a-zA-Zéû]+) (?<y>\d{4})/,
-				),
 		},
 		'pt-br': I18N_COMMON_PT,
 		'pt-pt': {
@@ -114,180 +84,156 @@
 			series: 'シリーズ',
 			title: 'タイトル',
 			type: '種類',
-			// ex. 2024/04/23
-			parseDateString: (dateString) => new Date(dateString),
 		},
 	};
 
-	// Print an informational message to the console
+	/** A list of watch history items to be exported */
+	const watchHistoryItems = [];
+
+	/** Print an informational message to the console */
 	const log = (msg, logFn = console.info, showPrefix = true) => {
 		const prefixArray = showPrefix
-			? [
-					'%c[Watch History Exporter for Amazon Prime]',
-					'color:#1399FF;background:#00050d;font-weight:bold;',
-				]
+			? ['%c[Watch History Exporter for Amazon Prime]', 'color:#1399FF;background:#00050d;font-weight:bold;']
 			: [];
 
 		logFn(...prefixArray, msg);
 	};
 
-	// Get a list of long month names for a given language
-	// Based on code by Maksim (https://dev.to/pretaporter/how-to-get-month-list-in-your-language-4lfb)
-	function getMonthNames(languageTag) {
-		const formatter = new Intl.DateTimeFormat(languageTag, { month: 'long' });
+	/** Decode HTML entities in an input string (ex. "&#34;", "&quot;", etc.) */
+	const decodeHtmlEntities = (() => {
+		const domParser = new DOMParser();
 
-		return Object.fromEntries(
-			[...Array(12).keys()]
-				.map((monthIndex) => formatter.format(new Date(2025, monthIndex)))
-				// Convert to lowercase to avoid case sensitivity issues
-				.map((key, index) => [key.toLowerCase(), index]),
-		);
-	}
+		return (str) => domParser.parseFromString(str, 'text/html').documentElement.textContent;
+	})();
 
-	// Parse a localized date string to a Date object
-	const parseDateString = (dateString, regex, isMonthNumeric = false) => {
-		const { y, m, d } = regex.exec(dateString).groups;
+	/** Escape a string for CSV by decoding HTML entities, escaping delimiters, and wrapping in quotes */
+	const escapeString = (str) => {
+		const decoded = decodeHtmlEntities(str);
+		const escaped = decoded.replaceAll(DELIMITER.string, `${DELIMITER.string}${DELIMITER.string}`);
 
-		return new Date(
-			Number.parseInt(y, 10),
-			isMonthNumeric
-				? Number.parseInt(m, 10) - 1
-				: i18n.monthNames[m.toLowerCase()],
-			Number.parseInt(d, 10),
-		);
+		return [DELIMITER.string, escaped, DELIMITER.string].join('');
 	};
 
-	// Convert a localized date string to an ISO date string
-	const toIsoDateString = (dateString) => {
-		const date = i18n.parseDateString(dateString);
+	/** Format an epoch-milliseconds timestamp into "yyyy-mm-dd hh:mm:ss.sss" */
+	const toDateTimeString = (ts) => new Date(ts).toISOString().slice(0, -1).split('T').join(' ');
 
-		if (Number.isNaN(date.getTime())) {
-			console.groupEnd();
-			console.groupEnd();
-			console.groupEnd();
-			log(
-				'Unsupported date format. Try changing the language of your Amazon Prime Video account to English',
-				console.error,
-			);
-			throw new Error();
-		}
-
-		return date.toISOString().split('T')[0];
-	};
-
-	// Escape spaces and string delimiters in a title
-	const escapeTitle = (title) =>
-		[
-			DELIMITER.string,
-			title.replaceAll(
-				DELIMITER.string,
-				`${DELIMITER.string}${DELIMITER.string}`,
-			),
-			DELIMITER.string,
-		].join('');
-
-	// Add a movie or episode to the array
-	const addItem = (
-		watchHistoryArray,
-		dateWatchedString,
-		title,
-		episodeTitle,
-	) => {
-		const isoDateWatchedString = toIsoDateString(dateWatchedString);
-		const mediaType = episodeTitle ? i18n.series : i18n.movie;
-		const formattedTitle = escapeTitle(title);
-		const formattedEpisodeTitle = episodeTitle ? escapeTitle(episodeTitle) : '';
-
-		watchHistoryArray.push([
-			isoDateWatchedString,
-			mediaType,
-			formattedTitle,
-			formattedEpisodeTitle,
-		]);
-
-		return watchHistoryArray;
-	};
-
-	// Parse the watch history and return an array of arrays
-	const parseWatchHistory = () => {
-		log('Parsing watch history... Items found:', console.group);
-
-		// Initialize an empty array to store the watch history
-		const watchHistoryArray = [];
-
-		// Select all list items within the watch history
-		const dateSections = document.querySelectorAll(
-			'div[data-automation-id=activity-history-items] > ul > li',
-		);
-
-		if (dateSections.length === 0) {
-			log('No watch history found', console.warn);
-		}
-
-		// Loop over date sections
+	/** Loop through the watch history items and add them to the watchHistoryItems array */
+	const processWatchHistoryItems = (dateSections) => {
 		for (const dateSection of dateSections) {
-			const mediaSections = dateSection.querySelectorAll('& > ul > li');
-			const dateWatchedString = dateSection.querySelector(
-				'[data-automation-id^="wh-date"]',
-			).textContent;
+			log(dateSection?.date, console.group, false);
 
-			log(dateWatchedString, console.group, false);
+			for (const itemsOfToday of dateSection.titles) {
+				const title = itemsOfToday?.title?.text ?? itemsOfToday?.title ?? '';
 
-			// Loop over media watched for each date
-			for (const mediaSection of mediaSections) {
-				const episodesWatchedCheckbox =
-					mediaSection.querySelector('[type="checkbox"]');
-				const title = mediaSection.querySelector('img').alt;
-
-				// If the 'Episodes watched' checkbox exists, it's a series
-				// Otherwise, it's a movie
-				if (episodesWatchedCheckbox) {
+				if (Array.isArray(itemsOfToday.children) && itemsOfToday.children.length > 0) {
 					log(`[${i18n.series}] ${title}`, console.group, false);
 
-					// Click the 'Episodes watched' checkbox if it exists to get the episode information
-					if (!episodesWatchedCheckbox.checked) {
-						// A click event is required to load the episode information (checking from DOM doesn't work)
-						episodesWatchedCheckbox.click();
-					}
-
-					const episodeSections = mediaSection.querySelectorAll(
-						'[data-automation-id^=wh-episode] > div > p',
-					);
-
-					// Loop over episodes watched for each series
-					for (const episodeSection of episodeSections) {
-						const episodeTitle = episodeSection?.textContent?.trim();
+					for (const episode of itemsOfToday.children) {
+						const episodeTitle = episode?.title?.text;
 
 						log(episodeTitle, console.info, false);
-						addItem(watchHistoryArray, dateWatchedString, title, episodeTitle);
+
+						const ts = episode?.time ?? itemsOfToday?.time ?? dateSection?.time;
+						const formattedDate = FORMAT_DATES ? toDateTimeString(ts) : String(ts);
+
+						watchHistoryItems.push([formattedDate, i18n.series, escapeString(title), escapeString(episodeTitle)]);
 					}
 
 					console.groupEnd();
 				} else {
 					log(`[${i18n.movie}] ${title}`, console.info, false);
-					addItem(watchHistoryArray, dateWatchedString, title);
+
+					const ts = itemsOfToday?.time ?? dateSection?.time;
+					const formattedDate = FORMAT_DATES ? toDateTimeString(ts) : String(ts);
+
+					watchHistoryItems.push([formattedDate, i18n.movie, escapeString(title), '']);
 				}
 			}
 
 			console.groupEnd();
 		}
-
-		console.groupEnd();
-
-		return watchHistoryArray;
 	};
 
-	// Force lazy loading of the watch history by scrolling to the bottom of the page
+	/** Processes the watch history items from the given object. Returns true if any watch-history widget was found and processed, otherwise false */
+	const processPotentialWatchHistoryResponse = (obj) => {
+		const widgets = obj?.widgets;
+
+		if (!Array.isArray(widgets)) return false;
+
+		let isValid = false;
+
+		for (const widget of widgets) {
+			if (widget?.widgetType !== 'watch-history') continue;
+
+			const dateSections = widget?.content?.content?.titles;
+
+			if (Array.isArray(dateSections)) {
+				processWatchHistoryItems(dateSections);
+
+				isValid = true;
+			}
+		}
+
+		return isValid;
+	};
+
+	/** Search the page for a script containing inline watch history data and process it */
+	const findInlineWatchHistory = async () => {
+		const scripts = Array.from(document.body.querySelectorAll('script[type="text/template"]'));
+		const promises = scripts.map(async (script) => {
+			const obj = JSON.parse(script.textContent.trim());
+			const wasProcessed = processPotentialWatchHistoryResponse(obj?.props);
+
+			if (!wasProcessed) throw new Error('Not processed');
+
+			return true;
+		});
+
+		try {
+			await Promise.any(promises);
+			log('Found and processed inline watch history', console.info);
+		} catch {
+			log(
+				'No valid inline watch history found (this is probably a bug). Some of the most recent watch history may be missing in the output. Skipping...',
+				console.warn
+			);
+		}
+	};
+
+	/** Clone a response and inspect it */
+	const inspectResponse = async (response) => {
+		const clonedResponse = response.clone();
+		const contentType =
+			(clonedResponse.headers && clonedResponse.headers.get && clonedResponse.headers.get('content-type')) || '';
+
+		if (!contentType.includes('application/json')) return;
+
+		const body = await clonedResponse.json();
+
+		processPotentialWatchHistoryResponse(body);
+	};
+
+	/** Monkey-patch native fetch function so we can intercept responses and extract watch history data from them */
+	const patchFetchFn = () => {
+		const originalFetchFn = window.fetch;
+
+		window.fetch = async (...args) => {
+			const response = await originalFetchFn(...args);
+
+			// No need to wait for this to complete
+			inspectResponse(response);
+
+			return response;
+		};
+	};
+
+	/** Force lazy loading of the watch history by scrolling to the bottom of the page */
 	const forceLoadWatchHistory = async () => {
 		log('Loading watch history...');
 
 		return new Promise((resolve) => {
 			const autoScrollInterval = setInterval(() => {
-				if (
-					!document.querySelector(
-						'div[data-automation-id=activity-history-items] > div > noscript',
-					)
-				) {
+				if (!document.body.querySelector('div[data-automation-id=activity-history-items] > div > noscript')) {
 					clearInterval(autoScrollInterval);
 					resolve();
 				}
@@ -297,49 +243,44 @@
 		});
 	};
 
-	// Download the watch history as a CSV file
-	const downloadCsv = (inputArray) => {
+	/** Download the watch history as a CSV file */
+	const downloadCsv = () => {
 		log('Saving CSV file...', console.group);
 		log(
 			'If you are not prompted to save a file, make sure "Pop-ups and redirects" and "Automatic downloads" are enabled for www.primevideo.com in your browser.',
 			console.info,
-			false,
+			false
 		);
 		console.groupEnd();
 
-		const columnNames = [
-			i18n.date_watched,
-			i18n.type,
-			i18n.title,
-			i18n.episode_title,
-		];
-		const csvData = [columnNames, ...inputArray]
+		const columnNames = [i18n.date_watched, i18n.type, i18n.title, i18n.episode_title].map(escapeString);
+		const csvData = [columnNames, ...watchHistoryItems]
 			.map((item) => item.join(DELIMITER.field))
 			.join(DELIMITER.record);
-		const csvDataUrl = `data:text/csv;charset=utf-8,${encodeURIComponent(
-			csvData,
-		)}`;
+		const csvDataUrl = `data:text/csv;charset=utf-8,${encodeURIComponent(csvData)}`;
 
 		window.open(csvDataUrl);
 	};
 
 	// Script entry point
 	log('Script started');
+
 	const languageTag = document.documentElement.lang;
+
 	let i18n = I18N[languageTag];
 
 	if (!i18n) {
-		log(
-			`Language "${languageTag}" is not supported. The script may fail`,
-			console.warn,
-		);
+		log(`Language "${languageTag}" is not supported. The script may fail`, console.warn);
 
 		i18n = I18N['en-us'];
 	}
 
-	i18n.monthNames = getMonthNames(languageTag);
+	await findInlineWatchHistory();
+
+	patchFetchFn();
 
 	await forceLoadWatchHistory();
-	downloadCsv(parseWatchHistory());
+
+	downloadCsv();
 	log('Script finished');
 })() && 'Script loaded';
