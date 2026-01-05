@@ -1,6 +1,6 @@
 (async () => {
 	/** When true, format epoch ms into "yyyy-mm-dd hh:mm:ss.000". Otherwise, output the raw epoch milliseconds value */
-	const FORMAT_DATES = false;
+	const FORMAT_DATES = true;
 
 	/** Delimiters for the CSV file */
 	const DELIMITER = {
