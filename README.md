@@ -22,7 +22,7 @@ This script runs in your browser and allows you to save your watch history from 
 
 - **⚡ Browser-based:** Run the script directly in your browser, no installation required
 - **📥 Detailed export:** Save your complete watch history as a CSV file with the following columns:
-  - Date Watched
+  - Date Watched (date and time)
   - Type (movie or TV show)
   - Title
   - Episode Title (for TV shows)
@@ -38,22 +38,42 @@ This script runs in your browser and allows you to save your watch history from 
   - 简体中文
   - 繁體中文
 
+### How it Works
+
+Pasting the script into your your browser's console lets it interact with the page and extract watch history like so:
+
+1. The first chunk of watch history data is delivered with the page as a JSON string embedded in a `<script type="text/template">` tag. The script finds and extracts this data and parses it into a JavaScript object
+2. The rest of the watch history is loaded with API calls when you scroll down the page. To get this data, we monkey-patch the built-in `fetch` to listen for responses containing the desired data
+3. To actually make the API calls, we simulate scrolling to the bottom of the page
+4. Once all data is loaded, we construct a CSV file and trigger a download using a data URL
+
+Previous versions of this script parsed the DOM directly, but the data available in the DOM is not as complete and adding support for multiple languages requires writing a lot of extra code for handling locale-specific dates and other strings.
+
 ## 🕹️ Usage
 
 > [!CAUTION]
 > For security reasons, I do not recommend running scripts from the internet unless you understand what they are doing. If you are not a developer, I recommend reading the comments in the code and/or asking a LLM like [ChatGPT] to explain it to you.
 
-You can run the script by going to [primevideo.com/settings/watch-history], copying the code in [watch-history-exporter-for-amazon-prime-video.js], and pasting it into your browser's devtools console.
+> [!WARNING]
+> Don't scroll down the page before you run the script. Scrolling will cause new items to be loaded before the script is able to see them, meaning there will be missing movie/shows in the output. I recommend reloading the page and then running the script.
 
-<details>
-  <summary><b>Detailed instructions:</b></summary>
-  <ol>
-    <li>Open <a href="https://www.primevideo.com/settings/watch-history">primevideo.com/settings/watch-history</a> in your browser</li>
-    <li>Open your browser's devtools console (<a href="https://balsamiq.com/support/faqs/browserconsole/">how?</a>)</li>
-    <li>Copy the code in <a href="watch-history-exporter-for-amazon-prime-video.js">watch-history-exporter-for-amazon-prime-video.js</a> and paste it into the console. If this doesn't work or you see a warning message about pasting, see the <a href="#FAQ">FAQ</a>.</li>
-    <li>Press enter to run the script. You should see the script running in the console and you'll be prompted to save a file when it finishes. If this doesn't happen, see the <a href="#FAQ">FAQ</a>.</li>
-  </ol>
-</details>
+**Instructions:**
+
+1. Open [primevideo.com/settings/watch-history] in your browser</li>
+2. Open your browser's devtools console ([how?](https://balsamiq.com/support/faqs/browserconsole/))
+3. Copy the code in [watch-history-exporter-for-amazon-prime-video.js] and paste it into the console. If this doesn't work or you see a warning message about pasting, see the [FAQ].
+4. Press enter to run the script. You should see the script running in the console and you'll be prompted to save a file when it finishes. If this doesn't happen, see the [FAQ].
+
+## 🤖 Advanced Usage
+
+### Formatting Dates
+
+By default, dates and times are saved in an RFC 3339-like format like `yyyy-mm-dd hh:mm:ss.sss`. Dates in this format are human-readable and easily understood by most spreadsheet programs.
+
+If you plan on using the CSV data programmatically, you can instead output raw Unix timestamps like `1759024824173`. Note that this is in milliseconds.
+
+
+To do this, change the `FORMAT_DATES` variable at the top of the script from `true` to `false`.
 
 ## 🛟 Support
 
@@ -96,6 +116,13 @@ Need help? See the [support resources](https://github.com/twocaretcat/.github/bl
 
 </details>
 
+<details>
+  <summary><b>Something else is broken</b></summary><br/>
+
+  If you can't get things working, you can try running an older version of the script. [v2.1.0](../../tree/v2.1.0) uses a different method to export your watch history than the current version, so it may work if the current version doesn't.
+
+</details>
+
 ## 🤝 Contributing
 
 Want to help out? Pull requests are welcome for:
@@ -110,7 +137,7 @@ See the [contribution guide](../../contribute) for more details.
 
 ## 🧾 License
 
-Copyright © 2025 [John Goodliff](https://johng.io/r/watch-history-exporter-for-amazon-prime-video) ([@twocaretcat](https://github.com/twocaretcat)).
+Copyright © 2026 [John Goodliff](https://johng.io/r/watch-history-exporter-for-amazon-prime-video) ([@twocaretcat](https://github.com/twocaretcat)).
 
 This project is released into the public domain (attribution is appreciated but not required 🙂). See the [license](LICENSE) for details.
 
@@ -128,6 +155,7 @@ If you can't donate but still want to contribute, don't worry. There are many ot
 
 I appreciate the support!
 
+[FAQ]: #FAQ
 [watch-history-exporter-for-amazon-prime-video.js]: watch-history-exporter-for-amazon-prime-video.js
 [primevideo.com/settings/watch-history]: https://www.primevideo.com/settings/watch-history
 [Amazon Prime Video]: https://www.primevideo.com
