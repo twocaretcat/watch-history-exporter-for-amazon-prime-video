@@ -26,17 +26,13 @@ This script runs in your browser and allows you to save your watch history from 
   - Type (movie or TV show)
   - Title
   - Episode Title (for TV shows)
-- **🌍 Multi-language support:** Built-in support for the following languages:
-  - Deutsch
-  - English
-  - Español
-  - Español Latinoamérica
-  - Français
-  - Português (Brasil)
-  - Português (Portugal)
-  - 日本語
-  - 简体中文
-  - 繁體中文
+- **🌍 Multi-language support<sup>1</sup>:** Built-in support for every language supported by Amazon Prime
+- **⚙️ Flexible configuration**: Power users can easily modify values used by the script to suit their needs, like:
+  - the date format (human-readable or Unix Timestamp)
+  - delimiters
+  - column names
+
+_<sup>1</sup> Column names will always be in English, but you can easily edit the values in the script or resulting CSV file._
 
 ### How it Works
 
@@ -66,14 +62,27 @@ Previous versions of this script parsed the DOM directly, but the data available
 
 ## 🤖 Advanced Usage
 
-### Formatting Dates
+There are several constants at the top of the script that can be used to tweak the script to suit your needs.
+
+### Date Formats
 
 By default, dates and times are saved in an RFC 3339-like format like `yyyy-mm-dd hh:mm:ss.sss`. Dates in this format are human-readable and easily understood by most spreadsheet programs.
 
 If you plan on using the CSV data programmatically, you can instead output raw Unix timestamps like `1759024824173`. Note that this is in milliseconds.
 
-
 To do this, change the `FORMAT_DATES` variable at the top of the script from `true` to `false`.
+
+### Custom Delimiters
+
+The `DELIMITERS` constant at the top of the file contains various delimiters used in the CSV file. Delimiters are used to separate items in the CSV file like strings, columns, and rows. If you want to use different delimiters, you can customize the values here.
+
+Note that the the defaults are chosen because they are compatible and auto-detected by most spreadsheet programs. They have also been tested to make sure things like weird movie titles don't break the output. Changing delimiters has the potential to cause issues.
+
+### Custom Column Names
+
+The `MSG` constant at the top of the file contains column names and values. If you want the CSV to be in a different language, you can customize these values.
+
+Alternatively, you can use a text editor or spreadsheet program to rename the columns after the CSV is generated.
 
 ## 🛟 Support
 
