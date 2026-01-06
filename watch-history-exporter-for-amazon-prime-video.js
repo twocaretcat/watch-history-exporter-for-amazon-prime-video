@@ -175,14 +175,25 @@
 		});
 	};
 
+	/** Print a message to the console encouraging users to sponsor my work */
+	const printSponsorMessage = () => {
+		const bannerStyle =
+			'color:#ffffff;border:2px solid hotpink;padding:8px 12px;border-radius:6px;font-weight:700;font-size:12px;';
+		const textStyle = 'font-size:12px;';
+
+		console.log('\n%c💖 If this script helped you save some time or effect, please consider sending $1 to support my work. Thanks :)', bannerStyle);
+		console.log('%c👉 GitHub:  https://github.com/sponsors/twocaretcat\n👉 Patreon: https://patreon.com/twocaretcat\n👉 Homepage: https://johng.io/funding', textStyle);
+	};
+
 	/** Download the watch history as a CSV file */
 	const downloadCsv = () => {
 		log('Saving CSV file...', console.group);
 		log(
-			'If you are not prompted to save a file, make sure "Pop-ups and redirects" and "Automatic downloads" are enabled for www.primevideo.com in your browser.',
+			'💡 If you are not prompted to save a file, make sure "Pop-ups and redirects" and "Automatic downloads" are enabled for www.primevideo.com in your browser.',
 			console.info,
 			false
 		);
+		printSponsorMessage();
 		console.groupEnd();
 
 		const columnNames = [MSG.dateWatched, MSG.type, MSG.title, MSG.episodeTitle].map(escapeString);
