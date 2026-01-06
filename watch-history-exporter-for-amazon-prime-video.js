@@ -1,4 +1,7 @@
 (async () => {
+	/** When true, prompt the user to continue when warning messages are displayed. Otherwise, continue automatically */
+	const INTERACTIVE = true;
+
 	/** When true, format epoch ms into "yyyy-mm-dd hh:mm:ss.000". Otherwise, output the raw epoch milliseconds value */
 	const FORMAT_DATES = true;
 
@@ -22,14 +25,45 @@
 	/** A list of watch history items to be exported */
 	const watchHistoryItems = [];
 
+	/** Get the corresponding suffix for a log message given a continuation status */
+	const getLogSuffix = (() => {
+		const suffixMap = {
+			true: ' Continuing...',
+			false: ' Cancelling...',
+			undefined: '',
+		};
+
+		return (doContinue) => [doContinue, suffixMap[doContinue]];
+	})();
+
 	/** Print an informational message to the console */
 	const log = (msg, logFn = console.info, showPrefix = true) => {
-		const prefixArray = showPrefix
-			? ['%c[Watch History Exporter for Amazon Prime]', 'color:#1399FF;background:#00050d;font-weight:bold;']
-			: [];
+		const prefix = '[Watch History Exporter for Amazon Prime]';
+		const prefixArray = showPrefix ? [`%c${prefix}`, 'color:#1399FF;background:#00050d;font-weight:bold;'] : [];
 
-		logFn(...prefixArray, msg);
+		const [doContinue, suffix] = getLogSuffix(
+			(() => {
+				if (logFn !== console.warn) {
+					return undefined;
+				}
+
+				if (INTERACTIVE) {
+					return window.confirm(multiline(prefix, msg));
+				}
+
+				return true;
+			})(),
+		);
+
+		logFn(...prefixArray, `${msg}${suffix}`);
+
+		if (doContinue === false) {
+			throw new Error('User cancelled execution');
+		}
 	};
+
+	/** Join an array of strings with double newlines */
+	const multiline = (...strs) => strs.join('\n\n');
 
 	/** Decode HTML entities in an input string (ex. "&#34;", "&quot;", etc.) */
 	const decodeHtmlEntities = (() => {
@@ -92,7 +126,7 @@
 
 		if (!Array.isArray(widgets)) return false;
 
-		let isValid = false;
+		let numOfItemsFound = 0;
 
 		for (const widget of widgets) {
 			if (widget?.widgetType !== 'watch-history') continue;
@@ -102,34 +136,58 @@
 			if (Array.isArray(dateSections)) {
 				processWatchHistoryItems(dateSections);
 
-				isValid = true;
+				numOfItemsFound = dateSections.length;
 			}
 		}
 
-		return isValid;
+		return numOfItemsFound;
 	};
 
 	/** Search the page for a script containing inline watch history data and process it */
 	const findInlineWatchHistory = async () => {
 		const scripts = Array.from(document.body.querySelectorAll('script[type="text/template"]'));
-		const promises = scripts.map(async (script) => {
+
+		let numOfItemsInJson = 0;
+
+		for (const script of scripts) {
 			const obj = JSON.parse(script.textContent.trim());
-			const wasProcessed = processPotentialWatchHistoryResponse(obj?.props);
 
-			if (!wasProcessed) throw new Error('Not processed');
+			numOfItemsInJson = processPotentialWatchHistoryResponse(obj?.props);
 
-			return true;
-		});
+			if (!numOfItemsInJson) {
+				continue;
+			}
 
-		try {
-			await Promise.any(promises);
-			log('Found and processed inline watch history', console.info);
-		} catch {
-			log(
-				'No valid inline watch history found (this is probably a bug). Some of the most recent watch history may be missing in the output. Skipping...',
-				console.warn
-			);
+			const numOfItemsOnPage = [...document.querySelectorAll('[data-automation-id^="wh-date"]')].length;
+
+			if (numOfItemsOnPage > numOfItemsInJson) {
+				log(
+					multiline(
+						'It looks like some watch history items have already been loaded. This can be caused by scrolling down the page before running the script.',
+						'To try again, click Cancel, reload the page, and run the script again.',
+						'Alternatively, you can click OK to continue, but some items may be missing from the output.',
+					),
+					console.warn,
+				);
+			}
+
+			break;
 		}
+
+		if (numOfItemsInJson) {
+			log('Found and processed inline watch history', console.info);
+
+			return;
+		}
+
+		log(
+			multiline(
+				'No valid inline watch history found (this is probably a bug).',
+				'To try again, click Cancel, reload the page, and run the script again.',
+				'Alternatively, you can click OK to continue, but some items may be missing from the output.',
+			),
+			console.warn,
+		);
 	};
 
 	/** Clone a response and inspect it */
@@ -177,12 +235,22 @@
 
 	/** Print a message to the console encouraging users to sponsor my work */
 	const printSponsorMessage = () => {
-		const bannerStyle =
-			'color:#ffffff;border:2px solid hotpink;padding:8px 12px;border-radius:6px;font-weight:700;font-size:12px;';
+		const bannerStyle = 'border:2px solid hotpink;padding:8px 12px;border-radius:6px;font-weight:700;font-size:12px;';
 		const textStyle = 'font-size:12px;';
 
-		console.log('\n%c💖 If this script helped you save some time or effect, please consider sending $1 to support my work. Thanks :)', bannerStyle);
-		console.log('%c👉 GitHub:  https://github.com/sponsors/twocaretcat\n👉 Patreon: https://patreon.com/twocaretcat\n👉 Homepage: https://johng.io/funding', textStyle);
+		console.log(
+			'\n%c💖 If this script helped you save some time or effort, please consider sending $1 to support my work. Thanks :)',
+			bannerStyle,
+		);
+		console.log(
+			[
+				'%c',
+				'👉 GitHub:   https://github.com/sponsors/twocaretcat',
+				'👉 Patreon:  https://patreon.com/twocaretcat',
+				'👉 More:     https://johng.io/funding',
+			].join('\n'),
+			textStyle,
+		);
 	};
 
 	/** Download the watch history as a CSV file */
@@ -191,7 +259,7 @@
 		log(
 			'💡 If you are not prompted to save a file, make sure "Pop-ups and redirects" and "Automatic downloads" are enabled for www.primevideo.com in your browser.',
 			console.info,
-			false
+			false,
 		);
 		printSponsorMessage();
 		console.groupEnd();
