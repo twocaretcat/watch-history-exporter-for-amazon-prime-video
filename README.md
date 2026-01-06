@@ -62,7 +62,13 @@ Previous versions of this script parsed the DOM directly, but the data available
 
 ## 🤖 Advanced Usage
 
-There are several constants at the top of the script that can be used to tweak the script to suit your needs.
+There are several constants at the top of the script that can be used to tweak the script's behavior to suit your needs.
+
+### Interactivity
+
+By default, the script will prompt you when something goes awry so you can decide if you want to continue or not.
+
+If you want to run the script programmatically or you don't care about warnings, you can change the `INTERACTIVE` variable at the top of the script from `true` to `false` to automatically continue when warnings are displayed.
 
 ### Date Formats
 
