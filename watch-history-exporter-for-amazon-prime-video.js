@@ -9,82 +9,14 @@
 		record: '\n',
 	};
 
-	const I18N_COMMON_ES = {
-		date_watched: 'Fecha vista',
-		episode_title: 'Episodio',
-		movie: 'Película',
-		series: 'Serie',
-		title: 'Título',
-		type: 'Tipo',
-	};
-
-	const I18N_COMMON_PT = {
-		date_watched: 'Data assistida',
-		episode_title: 'Episódio',
-		movie: 'Filme',
-		series: 'Série',
-		title: 'Título',
-		type: 'Tipo',
-	};
-
-	const I18N_COMMON_ZH = {
-		date_watched: '觀看日期',
-		episode_title: '集',
-		movie: '電影',
-		series: '劇集系列',
-		title: '標題',
-		type: '類型',
-	};
-
 	/** Locale-specific strings and functions */
-	const I18N = {
-		'de-de': {
-			date_watched: 'Datum angesehen',
-			episode_title: 'Folge',
-			movie: 'Film',
-			series: 'Serie',
-			title: 'Titel',
-			type: 'Typ',
-		},
-		'en-us': {
-			date_watched: 'Date Watched',
-			episode_title: 'Episode',
-			movie: 'Movie',
-			series: 'Series',
-			title: 'Title',
-			type: 'Type',
-		},
-		'es-419': I18N_COMMON_ES,
-		'es-es': {
-			...I18N_COMMON_ES,
-			date_watched: 'Fecha de visualización',
-		},
-		'fr-fr': {
-			date_watched: 'Date regardée',
-			episode_title: 'Épisode',
-			movie: 'Film',
-			series: 'Série',
-			title: 'Titre',
-			type: 'Type',
-		},
-		'pt-br': I18N_COMMON_PT,
-		'pt-pt': {
-			...I18N_COMMON_PT,
-			date_watched: 'Data de visualização',
-		},
-		'zh-cn': {
-			...I18N_COMMON_ZH,
-			series: '剧集系列',
-		},
-		'zh-tw': I18N_COMMON_ZH,
-		'ja-jp': {
-			date_watched: '視聴日',
-			episode_title: 'エピソード',
-			movie: '映画',
-			series: 'シリーズ',
-			title: 'タイトル',
-			type: '種類',
-		},
+	const MSG = {
+		dateWatched: 'Date Watched',
+		episodeTitle: 'Episode',
+		movie: 'Movie',
+		series: 'Series',
+		title: 'Title',
+		type: 'Type',
 	};
 
 	/** A list of watch history items to be exported */
@@ -126,7 +58,7 @@
 				const title = itemsOfToday?.title?.text ?? itemsOfToday?.title ?? '';
 
 				if (Array.isArray(itemsOfToday.children) && itemsOfToday.children.length > 0) {
-					log(`[${i18n.series}] ${title}`, console.group, false);
+					log(`[${MSG.series}] ${title}`, console.group, false);
 
 					for (const episode of itemsOfToday.children) {
 						const episodeTitle = episode?.title?.text;
@@ -136,17 +68,17 @@
 						const ts = episode?.time ?? itemsOfToday?.time ?? dateSection?.time;
 						const formattedDate = FORMAT_DATES ? toDateTimeString(ts) : String(ts);
 
-						watchHistoryItems.push([formattedDate, i18n.series, escapeString(title), escapeString(episodeTitle)]);
+						watchHistoryItems.push([formattedDate, MSG.series, escapeString(title), escapeString(episodeTitle)]);
 					}
 
 					console.groupEnd();
 				} else {
-					log(`[${i18n.movie}] ${title}`, console.info, false);
+					log(`[${MSG.movie}] ${title}`, console.info, false);
 
 					const ts = itemsOfToday?.time ?? dateSection?.time;
 					const formattedDate = FORMAT_DATES ? toDateTimeString(ts) : String(ts);
 
-					watchHistoryItems.push([formattedDate, i18n.movie, escapeString(title), '']);
+					watchHistoryItems.push([formattedDate, MSG.movie, escapeString(title), '']);
 				}
 			}
 
@@ -253,7 +185,7 @@
 		);
 		console.groupEnd();
 
-		const columnNames = [i18n.date_watched, i18n.type, i18n.title, i18n.episode_title].map(escapeString);
+		const columnNames = [MSG.dateWatched, MSG.type, MSG.title, MSG.episodeTitle].map(escapeString);
 		const csvData = [columnNames, ...watchHistoryItems]
 			.map((item) => item.join(DELIMITER.field))
 			.join(DELIMITER.record);
@@ -264,16 +196,6 @@
 
 	// Script entry point
 	log('Script started');
-
-	const languageTag = document.documentElement.lang;
-
-	let i18n = I18N[languageTag];
-
-	if (!i18n) {
-		log(`Language "${languageTag}" is not supported. The script may fail`, console.warn);
-
-		i18n = I18N['en-us'];
-	}
 
 	await findInlineWatchHistory();
 
