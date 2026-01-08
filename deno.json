@@ -1,0 +1,15 @@
+{
+	"version": "3.0.0",
+	"fmt": {
+		"useTabs": true,
+		"lineWidth": 120,
+		"singleQuote": true
+	},
+	"lint": {
+		"rules": {
+			"tags": [
+				"recommended"
+			]
+		}
+	}
+}
