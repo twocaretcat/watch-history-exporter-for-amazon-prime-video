@@ -14,12 +14,21 @@
 
 	/** Locale-specific strings and functions */
 	const MSG = {
-		dateWatched: 'Date Watched',
-		episodeTitle: 'Episode',
-		movie: 'Movie',
-		series: 'Series',
-		title: 'Title',
-		type: 'Type',
+		column: {
+			dateWatched: 'Date Watched',
+			type: 'Type',
+			title: 'Title',
+			episodeTitle: 'Episode Title',
+			gti: 'Global Title Identifier',
+			episodeGti: 'Episode Global Title Identifier',
+			path: 'Path',
+			episodePath: 'Episode Path',
+			imageUrl: 'Image URL',
+		},
+		value: {
+			movie: 'Movie',
+			series: 'Series',
+		},
 	};
 
 	/** A list of watch history items to be exported */
@@ -72,48 +81,72 @@
 		return (str) => domParser.parseFromString(str, 'text/html').documentElement.textContent;
 	})();
 
-	/** Escape a string for CSV by decoding HTML entities, escaping delimiters, and wrapping in quotes */
-	const escapeString = (str) => {
-		const decoded = decodeHtmlEntities(str);
-		const escaped = decoded.replaceAll(DELIMITER.string, `${DELIMITER.string}${DELIMITER.string}`);
+	/** Escape a string for CSV by escaping delimiters and wrapping in quotes */
+	const csvEscape = (str) =>
+		[
+			DELIMITER.string,
+			str.replaceAll(DELIMITER.string, `${DELIMITER.string}${DELIMITER.string}`),
+			DELIMITER.string,
+		].join('');
 
-		return [DELIMITER.string, escaped, DELIMITER.string].join('');
-	};
-
-	/** Format an epoch-milliseconds timestamp into "yyyy-mm-dd hh:mm:ss.sss" */
-	const toDateTimeString = (ts) => new Date(ts).toISOString().slice(0, -1).split('T').join(' ');
+	/** If `FORMAT_DATES` is true, format an epoch-milliseconds timestamp as "yyyy-mm-dd hh:mm:ss.sss", otherwise return the timestamp as a string */
+	const toDateTimeString = (ts) =>
+		FORMAT_DATES ? new Date(ts).toISOString().slice(0, -1).split('T').join(' ') : String(ts);
 
 	/** Loop through the watch history items and add them to the watchHistoryItems array */
 	const processWatchHistoryItems = (dateSections) => {
 		for (const dateSection of dateSections) {
 			log(dateSection?.date, console.group, false);
 
-			for (const itemsOfToday of dateSection.titles) {
-				const title = itemsOfToday?.title?.text ?? itemsOfToday?.title ?? '';
+			for (const itemOfToday of dateSection.titles) {
+				const title = itemOfToday?.title?.text;
+				const id = itemOfToday?.gti;
+				const path = itemOfToday?.title?.href;
+				const imageUrl = itemOfToday?.imageSrc;
 
-				if (Array.isArray(itemsOfToday.children) && itemsOfToday.children.length > 0) {
-					log(`[${MSG.series}] ${title}`, console.group, false);
+				if (Array.isArray(itemOfToday.children) && itemOfToday.children.length > 0) {
+					const type = MSG.value.series;
 
-					for (const episode of itemsOfToday.children) {
+					log(`[${type}] ${title}`, console.group, false);
+
+					for (const episode of itemOfToday.children) {
 						const episodeTitle = episode?.title?.text;
 
 						log(episodeTitle, console.info, false);
 
-						const ts = episode?.time ?? itemsOfToday?.time ?? dateSection?.time;
-						const formattedDate = FORMAT_DATES ? toDateTimeString(ts) : String(ts);
-
-						watchHistoryItems.push([formattedDate, MSG.series, escapeString(title), escapeString(episodeTitle)]);
+						watchHistoryItems.push({
+							date: toDateTimeString(episode?.time),
+							type,
+							title,
+							episodeTitle: episodeTitle,
+							id,
+							episodeId: episode?.gti,
+							path,
+							episodePath: episode?.title?.href,
+							imageUrl,
+						});
 					}
 
 					console.groupEnd();
-				} else {
-					log(`[${MSG.movie}] ${title}`, console.info, false);
 
-					const ts = itemsOfToday?.time ?? dateSection?.time;
-					const formattedDate = FORMAT_DATES ? toDateTimeString(ts) : String(ts);
-
-					watchHistoryItems.push([formattedDate, MSG.movie, escapeString(title), '']);
+					continue;
 				}
+
+				const type = MSG.value.movie;
+
+				log(`[${type}] ${title}`, console.info, false);
+
+				watchHistoryItems.push({
+					date: toDateTimeString(itemOfToday?.time),
+					type,
+					title,
+					episodeTitle: '',
+					id,
+					episodeId: '',
+					path,
+					episodePath: '',
+					imageUrl,
+				});
 			}
 
 			console.groupEnd();
@@ -239,7 +272,7 @@
 		const textStyle = 'font-size:12px;';
 
 		console.log(
-			'\n%c💖 If this script helped you save some time or effort, please consider sending $1 to support my work. Thanks :)',
+			'\n%c💖 If this script saved you some time or effort, please consider donating $1 to support my work. Thanks :)',
 			bannerStyle,
 		);
 		console.log(
@@ -253,6 +286,10 @@
 		);
 	};
 
+	/** Map a watch history item to a row of CSV data  */
+	const watchHistoryItemToRow = (watchHistoryItem) =>
+		Object.values(watchHistoryItem).map((columnValue) => csvEscape(decodeHtmlEntities(columnValue)));
+
 	/** Download the watch history as a CSV file */
 	const downloadCsv = () => {
 		log('Saving CSV file...', console.group);
@@ -264,10 +301,9 @@
 		printSponsorMessage();
 		console.groupEnd();
 
-		const columnNames = [MSG.dateWatched, MSG.type, MSG.title, MSG.episodeTitle].map(escapeString);
-		const csvData = [columnNames, ...watchHistoryItems]
-			.map((item) => item.join(DELIMITER.field))
-			.join(DELIMITER.record);
+		const columnNames = Object.values(MSG.column).map(csvEscape);
+		const rows = watchHistoryItems.map(watchHistoryItemToRow);
+		const csvData = [columnNames, ...rows].map((item) => item.join(DELIMITER.field)).join(DELIMITER.record);
 		const csvDataUrl = `data:text/csv;charset=utf-8,${encodeURIComponent(csvData)}`;
 
 		window.open(csvDataUrl);
