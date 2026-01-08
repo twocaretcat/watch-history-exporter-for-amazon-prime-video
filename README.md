@@ -12,19 +12,19 @@
     <a href="https://github.com/twocaretcat/watch-history-exporter-for-amazon-prime-video/releases/latest"><img src="https://img.shields.io/github/v/release/twocaretcat/watch-history-exporter-for-amazon-prime-video.svg" alt="Latest release" title="Latest release"/></a>
   </p>
   <p class="projectDesc">
-    A script to export your Amazon Prime Video watch history as a CSV file.
+    A script to export your Amazon Prime Video watch history as a JSON or CSV file.
   </p>
   <br/>
 </div>
 
 ## 👋 About
 
-This script runs in your browser and allows you to save your watch history from [Amazon Prime Video] to a CSV file, where it can be processed further or imported into other platforms.
+This script runs in your browser and allows you to save your watch history from [Amazon Prime Video] to a JSON or CSV file, where it can be processed further or imported into other platforms.
 
 ### Features
 
 - **⚡ Browser-based:** Run the script directly in your browser, no installation required
-- **📥 Detailed export:** Save your complete watch history as a CSV file with the following [columns](#columns):
+- **📥 Detailed export:** Save your complete watch history as a JSON or CSV file with the following [columns](#columns):
   - Date Watched (date and time)
   - Type (movie or TV show)
   - Title
@@ -36,11 +36,13 @@ This script runs in your browser and allows you to save your watch history from 
   - Image URL
 - **🌍 Multi-language support<sup>1</sup>:** Built-in support for every language supported by Amazon Prime
 - **⚙️ Flexible configuration**: Power users can easily modify values used by the script to suit their needs, like:
-  - [the date format](#date-formats) (human-readable or Unix Timestamp)
+  - [mode](#interactivity) (interactive or headless)
+  - [output format](#output-format) (JSON or CSV)
+  - [date format](#date-formats) (human-readable or Unix Timestamp)
   - [delimiters](#custom-delimiters)
   - [column names](#custom-column-names)
 
-_<sup>1</sup> Column names will still be in English, but you can easily [edit the values](#custom-column-names) in the script or resulting CSV file if you wish._
+_<sup>1</sup> Column names will still be in English, but you can easily [edit the values](#custom-column-names) in the script or resulting file if you wish._
 
 ### How it Works
 
@@ -90,22 +92,31 @@ There are several constants at the top of the script that can be used to tweak t
 
 By default, the script will prompt you when something goes awry so you can decide if you want to continue or not.
 
-If you want to run the script programmatically or you don't care about warnings, you can change the `INTERACTIVE` variable at the top of the script from `true` to `false` to automatically continue when warnings are displayed.
+If you want to run the script programmatically or you don't care about warnings, you can change the `OPTION.interactive` variable at the top of the script from `true` to `false` to automatically continue when warnings are displayed.
+
+### Output Format
+
+> [!NOTE]
+> CSV files have human-readable column names, while JSON files have machine-readable property names.
+
+By default, the output is saved as a CSV file. If you prefer JSON, change the `OPTION.outputJson` variable at the top of the script from `false` to `true`.
+
+JSON uses tabs to indent the output by default, but you can [change this](#custom-delimiters) to an empty string for a smaller file size or spaces if you prefer those.
 
 ### Date Formats
 
 By default, dates and times are saved in an RFC 3339-like format like `yyyy-mm-dd hh:mm:ss.sss`. Dates in this format are human-readable and easily understood by most spreadsheet programs.
 
-If you plan on using the CSV data programmatically, you can instead output raw Unix timestamps like `1759024824173`. Note that this is in milliseconds.
+If you plan on using the CSV data programmatically, you can instead output raw Unix Timestamps like `1759024824173`. Note that this is in milliseconds.
 
-To do this, change the `FORMAT_DATES` variable at the top of the script from `true` to `false`.
+To do this, change the `OPTION.formatDates` variable at the top of the script from `true` to `false`.
 
 ### Custom Delimiters
 
 > [!NOTE]
 > The default values were chosen because they are compatible and auto-detected by most spreadsheet programs. They have also been tested to make sure things like weird movie titles don't break the output. Changing delimiters has the potential to cause issues.
 
-The `DELIMITERS` constant at the top of the file contains various delimiters used in the CSV file. By default, we use `"` to separate strings, `,` to separate columns, and `\n` (newline) to separate rows. If you want to use different delimiters, you can customize the values here.
+The `DELIMITERS` constant at the top of the file contains various delimiters used in the CSV file. By default, we use `"` to separate strings, `,` to separate columns, and `\n` (newline) to separate rows. ``\t`` (tab) is used to separate JSON objects when exporting as JSON. If you want to use different delimiters, you can customize the values here.
 
 ### Custom Column Names
 
