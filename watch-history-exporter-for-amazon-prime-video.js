@@ -1,15 +1,20 @@
 (async () => {
-	/** When true, prompt the user to continue when warning messages are displayed. Otherwise, continue automatically */
-	const INTERACTIVE = true;
-
-	/** When true, format epoch ms into "yyyy-mm-dd hh:mm:ss.000". Otherwise, output the raw epoch milliseconds value */
-	const FORMAT_DATES = true;
+	/** Configurable options */
+	const OPTION = {
+		/** When true, prompt the user to continue when warning messages are displayed. Otherwise, continue automatically */
+		interactive: true,
+		/** When true, save the output as JSON. Otherwise, save it as CSV */
+		outputJson: false,
+		/** When true, format epoch ms into "yyyy-mm-dd hh:mm:ss.000". Otherwise, output the raw epoch milliseconds value */
+		formatDates: true,
+	};
 
 	/** Delimiters for the CSV file */
 	const DELIMITER = {
 		string: '"',
 		field: ',',
 		record: '\n',
+		json: '\t',
 	};
 
 	/** Locale-specific strings and functions */
@@ -56,7 +61,7 @@
 					return undefined;
 				}
 
-				if (INTERACTIVE) {
+				if (OPTION.interactive) {
 					return window.confirm(multiline(prefix, msg));
 				}
 
@@ -81,17 +86,17 @@
 		return (str) => domParser.parseFromString(str, 'text/html').documentElement.textContent;
 	})();
 
-	/** Escape a string for CSV by escaping delimiters and wrapping in quotes */
-	const csvEscape = (str) =>
+	/** Escape a value for CSV by converting it to a string, escaping delimiters, and wrapping in quotes */
+	const csvEscape = (value) =>
 		[
 			DELIMITER.string,
-			str.replaceAll(DELIMITER.string, `${DELIMITER.string}${DELIMITER.string}`),
+			String(value).replaceAll(DELIMITER.string, `${DELIMITER.string}${DELIMITER.string}`),
 			DELIMITER.string,
 		].join('');
 
-	/** If `FORMAT_DATES` is true, format an epoch-milliseconds timestamp as "yyyy-mm-dd hh:mm:ss.sss", otherwise return the timestamp as a string */
+	/** If `OPTION.formatDates` is true, format an epoch-milliseconds timestamp as "yyyy-mm-dd hh:mm:ss.sss", otherwise return the timestamp as a string */
 	const toDateTimeString = (ts) =>
-		FORMAT_DATES ? new Date(ts).toISOString().slice(0, -1).split('T').join(' ') : String(ts);
+		OPTION.formatDates ? new Date(ts).toISOString().slice(0, -1).split('T').join(' ') : ts;
 
 	/** Loop through the watch history items and add them to the watchHistoryItems array */
 	const processWatchHistoryItems = (dateSections) => {
@@ -99,7 +104,7 @@
 			log(dateSection?.date, console.group, false);
 
 			for (const itemOfToday of dateSection.titles) {
-				const title = itemOfToday?.title?.text;
+				const title = decodeHtmlEntities(itemOfToday?.title?.text);
 				const id = itemOfToday?.gti;
 				const path = itemOfToday?.title?.href;
 				const imageUrl = itemOfToday?.imageSrc;
@@ -110,12 +115,12 @@
 					log(`[${type}] ${title}`, console.group, false);
 
 					for (const episode of itemOfToday.children) {
-						const episodeTitle = episode?.title?.text;
+						const episodeTitle = decodeHtmlEntities(episode?.title?.text);
 
 						log(episodeTitle, console.info, false);
 
 						watchHistoryItems.push({
-							date: toDateTimeString(episode?.time),
+							dateWatched: toDateTimeString(episode?.time),
 							type,
 							title,
 							episodeTitle: episodeTitle,
@@ -137,7 +142,7 @@
 				log(`[${type}] ${title}`, console.info, false);
 
 				watchHistoryItems.push({
-					date: toDateTimeString(itemOfToday?.time),
+					dateWatched: toDateTimeString(itemOfToday?.time),
 					type,
 					title,
 					episodeTitle: '',
@@ -286,13 +291,20 @@
 		);
 	};
 
-	/** Map a watch history item to a row of CSV data  */
-	const watchHistoryItemToRow = (watchHistoryItem) =>
-		Object.values(watchHistoryItem).map((columnValue) => csvEscape(decodeHtmlEntities(columnValue)));
+	/** Encode the watch history as CSV */
+	const encodeAsCsv = () => {
+		const columnNames = Object.values(MSG.column).map(csvEscape);
+		const rows = watchHistoryItems.map((watchHistoryItem) => Object.values(watchHistoryItem).map(csvEscape));
 
-	/** Download the watch history as a CSV file */
-	const downloadCsv = () => {
-		log('Saving CSV file...', console.group);
+		return ['csv', 'text/csv', [columnNames, ...rows].map((item) => item.join(DELIMITER.field)).join(DELIMITER.record)];
+	};
+
+	/** Encode the watch history as JSON */
+	const encodeAsJson = () => ['json', 'application/json', JSON.stringify(watchHistoryItems, null, DELIMITER.json)];
+
+	/** Download the watch history as a CSV or JSON file */
+	const downloadFile = () => {
+		log(`Saving ${OPTION.outputJson ? 'JSON' : 'CSV'} file...`, console.group);
 		log(
 			'💡 If you are not prompted to save a file, make sure "Pop-ups and redirects" and "Automatic downloads" are enabled for www.primevideo.com in your browser.',
 			console.info,
@@ -301,12 +313,18 @@
 		printSponsorMessage();
 		console.groupEnd();
 
-		const columnNames = Object.values(MSG.column).map(csvEscape);
-		const rows = watchHistoryItems.map(watchHistoryItemToRow);
-		const csvData = [columnNames, ...rows].map((item) => item.join(DELIMITER.field)).join(DELIMITER.record);
-		const csvDataUrl = `data:text/csv;charset=utf-8,${encodeURIComponent(csvData)}`;
+		const [extension, mimeType, data] = OPTION.outputJson ? encodeAsJson() : encodeAsCsv();
+		const blob = new Blob([data], { type: mimeType });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
 
-		window.open(csvDataUrl);
+		a.href = url;
+		a.download = `watch-history-export-${Date.now()}.${extension}`;
+
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
 	};
 
 	// Script entry point
@@ -318,6 +336,6 @@
 
 	await forceLoadWatchHistory();
 
-	downloadCsv();
+	downloadFile();
 	log('Script finished');
 })() && 'Script loaded';
