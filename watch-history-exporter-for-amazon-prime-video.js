@@ -5,6 +5,8 @@
 		interactive: true,
 		/** When true, save the output as JSON. Otherwise, save it as CSV */
 		outputJson: false,
+		/** The filename to use for the output file. The file extension will be added automatically */
+		outputFilename: `watch-history-export-${Date.now()}`,
 		/** When true, format epoch ms into "yyyy-mm-dd hh:mm:ss.000". Otherwise, output the raw epoch milliseconds value */
 		formatDates: true,
 	};
@@ -319,7 +321,7 @@
 		const a = document.createElement('a');
 
 		a.href = url;
-		a.download = `watch-history-export-${Date.now()}.${extension}`;
+		a.download = `${OPTION.outputFilename}.${extension}`;
 
 		document.body.appendChild(a);
 		a.click();
