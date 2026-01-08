@@ -38,6 +38,7 @@ This script runs in your browser and allows you to save your watch history from 
 - **⚙️ Flexible configuration**: Power users can easily modify values used by the script to suit their needs, like:
   - [mode](#interactivity) (interactive or headless)
   - [output format](#output-format) (JSON or CSV)
+  - [output filename](#output-filename)
   - [date format](#date-formats) (human-readable or Unix Timestamp)
   - [delimiters](#custom-delimiters)
   - [column names](#custom-column-names)
@@ -102,6 +103,13 @@ If you want to run the script programmatically or you don't care about warnings,
 By default, the output is saved as a CSV file. If you prefer JSON, change the `OPTION.outputJson` variable at the top of the script from `false` to `true`.
 
 JSON uses tabs to indent the output by default, but you can [change this](#custom-delimiters) to an empty string for a smaller file size or spaces if you prefer those.
+
+### Output Filename
+
+> [!NOTE]
+> The file extension will be added automatically.
+
+By default, the output filename is `watch-history-export-<timestamp>`. You can change this by modifying the `OPTION.outputFilename` variable at the top of the script.
 
 ### Date Formats
 
