@@ -2,11 +2,14 @@
 <div align="center">
   <img class="projectLogo" src="screenshot.png" alt="Project logo" title="Project logo" width="512">
   <h1 class="projectName">Watch History Exporter for Amazon Prime Video</h1>
-  <p class="projectBadges">
+  <p class="projectBadges info">
     <img src="https://johng.io/badges/category/Script.svg" alt="Project category" title="Project category">
     <img src="https://img.shields.io/github/languages/top/twocaretcat/watch-history-exporter-for-amazon-prime-video.svg" alt="Language" title="Language">
     <img src="https://img.shields.io/github/repo-size/twocaretcat/watch-history-exporter-for-amazon-prime-video.svg" alt="Repository size" title="Repository size">
     <a href="LICENSE"><img src="https://img.shields.io/github/license/twocaretcat/watch-history-exporter-for-amazon-prime-video.svg" alt="Project license" title="Project license"/></a>
+  </p>
+  <p class="projectBadges status">
+    <a href="https://github.com/twocaretcat/watch-history-exporter-for-amazon-prime-video/releases/latest"><img src="https://img.shields.io/github/v/release/twocaretcat/watch-history-exporter-for-amazon-prime-video.svg" alt="Latest release" title="Latest release"/></a>
   </p>
   <p class="projectDesc">
     A script to export your Amazon Prime Video watch history as a CSV file.
@@ -21,18 +24,23 @@ This script runs in your browser and allows you to save your watch history from 
 ### Features
 
 - **⚡ Browser-based:** Run the script directly in your browser, no installation required
-- **📥 Detailed export:** Save your complete watch history as a CSV file with the following columns:
+- **📥 Detailed export:** Save your complete watch history as a CSV file with the following [columns](#columns):
   - Date Watched (date and time)
   - Type (movie or TV show)
   - Title
   - Episode Title (for TV shows)
+  - Global Title Identifier (GTI)
+  - Episode Global Title Identifier (GTI)
+  - Path (URL)
+  - Episode Path (URL)
+  - Image URL
 - **🌍 Multi-language support<sup>1</sup>:** Built-in support for every language supported by Amazon Prime
 - **⚙️ Flexible configuration**: Power users can easily modify values used by the script to suit their needs, like:
-  - the date format (human-readable or Unix Timestamp)
-  - delimiters
-  - column names
+  - [the date format](#date-formats) (human-readable or Unix Timestamp)
+  - [delimiters](#custom-delimiters)
+  - [column names](#custom-column-names)
 
-_<sup>1</sup> Column names will always be in English, but you can easily edit the values in the script or resulting CSV file._
+_<sup>1</sup> Column names will still be in English, but you can easily [edit the values](#custom-column-names) in the script or resulting CSV file if you wish._
 
 ### How it Works
 
@@ -60,6 +68,20 @@ Previous versions of this script parsed the DOM directly, but the data available
 3. Copy the code in [watch-history-exporter-for-amazon-prime-video.js] and paste it into the console. If this doesn't work or you see a warning message about pasting, see the [FAQ].
 4. Press enter to run the script. You should see the script running in the console and you'll be prompted to save a file when it finishes. If this doesn't happen, see the [FAQ].
 
+### Columns
+
+|                              Column | Description                                                                                                                       |
+| ----------------------------------: | --------------------------------------------------------------------------------------------------------------------------------- |
+|                    **Date Watched** | When the item was watched. Stored as a timestamp or formatted date, [depending on configuration](#date-formats).                  |
+|                            **Type** | Whether the item is a movie or a series episode.                                                                                  |
+|                           **Title** | The movie title or series name.                                                                                                   |
+|                   **Episode Title** | The episode title (empty for movies).                                                                                             |
+|         **Global Title Identifier** | Amazon’s internal unique identifier for the movie or series.                                                                      |
+| **Episode Global Title Identifier** | Amazon’s internal unique identifier for the episode (empty for movies).                                                           |
+|                            **Path** | Prime Video URL path for the movie or series. To get the full URL, prepend `https://www.primevideo.com` to this value.            |
+|                    **Episode Path** | Prime Video URL path for the episode (empty for movies). To get the full URL, prepend `https://www.primevideo.com` to this value. |
+|                       **Image URL** | URL of the poster or thumbnail image.                                                                                             |
+
 ## 🤖 Advanced Usage
 
 There are several constants at the top of the script that can be used to tweak the script's behavior to suit your needs.
@@ -80,9 +102,10 @@ To do this, change the `FORMAT_DATES` variable at the top of the script from `tr
 
 ### Custom Delimiters
 
-The `DELIMITERS` constant at the top of the file contains various delimiters used in the CSV file. Delimiters are used to separate items in the CSV file like strings, columns, and rows. If you want to use different delimiters, you can customize the values here.
+> [!NOTE]
+> The default values were chosen because they are compatible and auto-detected by most spreadsheet programs. They have also been tested to make sure things like weird movie titles don't break the output. Changing delimiters has the potential to cause issues.
 
-Note that the the defaults are chosen because they are compatible and auto-detected by most spreadsheet programs. They have also been tested to make sure things like weird movie titles don't break the output. Changing delimiters has the potential to cause issues.
+The `DELIMITERS` constant at the top of the file contains various delimiters used in the CSV file. By default, we use `"` to separate strings, `,` to separate columns, and `\n` (newline) to separate rows. If you want to use different delimiters, you can customize the values here.
 
 ### Custom Column Names
 
@@ -98,6 +121,8 @@ Need help? See the [support resources](https://github.com/twocaretcat/.github/bl
 - report bugs
 - ask questions
 - report security vulnerabilities
+
+Some solutions to common issues are also listed below.
 
 ### FAQ
 
@@ -170,7 +195,7 @@ If you can't donate but still want to contribute, don't worry. There are many ot
 
 I appreciate the support!
 
-[FAQ]: #FAQ
+[FAQ]: #faq
 [watch-history-exporter-for-amazon-prime-video.js]: watch-history-exporter-for-amazon-prime-video.js
 [primevideo.com/settings/watch-history]: https://www.primevideo.com/settings/watch-history
 [Amazon Prime Video]: https://www.primevideo.com
