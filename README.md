@@ -47,6 +47,45 @@ file, where it can be processed further or imported into other platforms.
 _<sup>1</sup> Column names will still be in English, but you can easily [edit the values](#custom-column-names) in the
 script or resulting file if you wish._
 
+### Example Output
+
+#### CSV
+
+```csv
+"Date Watched","Type","Title","Episode Title","Global Title Identifier","Episode Global Title Identifier","Path","Episode Path","Image URL"
+"2025-09-28 02:00:24.173","Series","The Terminal List: Dark Wolf - Season 1","Episode 1: ""INHERENT RESOLVE""","amzn1.dv.gti.83c8ce44-b42e-40fd-8546-c36fd2824071","amzn1.dv.gti.16c010ce-0da6-42fb-b031-13dfa43105b6","/region/na/detail/0MYH9XYR9SCGXB57LR8ES71GFL/ref=atv_set_wh_dp","/region/na/detail/0GI3HHV1BYZKGSIE8EEPCUPUPI/ref=atv_set_wh_dp","https://images-na.ssl-images-amazon.com/images/S/pv-target-images/4b6e6de10b8cda8efd7b42419c2cf4c82649a44dc7a03528f28f7cd9280d4b46._UX667_UY375_SY200_.jpg"
+"2023-10-03 04:06:31.437","Movie","Everything Everywhere All at Once","","amzn1.dv.gti.9d433401-4b4f-4737-9ec7-ce92e6b313f2","","/region/na/detail/0OGS49QMOKJSEBRYHCDSWSP8MQ/ref=atv_set_wh_dp","","https://m.media-amazon.com/images/S/pv-target-images/bba149329b86df530aaa47625125cafd766fc14fde4867e2d067afea0f4faadd._UX667_UY375_SY200_.jpg"
+```
+
+#### JSON (with date formatting disabled):
+
+```json
+[
+	{
+		"dateWatched": 1759024824173,
+		"type": "Series",
+		"title": "The Terminal List: Dark Wolf - Season 1",
+		"episodeTitle": "Episode 1: \"INHERENT RESOLVE\"",
+		"id": "amzn1.dv.gti.83c8ce44-b42e-40fd-8546-c36fd2824071",
+		"episodeId": "amzn1.dv.gti.16c010ce-0da6-42fb-b031-13dfa43105b6",
+		"path": "/region/na/detail/0MYH9XYR9SCGXB57LR8ES71GFL/ref=atv_set_wh_dp",
+		"episodePath": "/region/na/detail/0GI3HHV1BYZKGSIE8EEPCUPUPI/ref=atv_set_wh_dp",
+		"imageUrl": "https://images-na.ssl-images-amazon.com/images/S/pv-target-images/4b6e6de10b8cda8efd7b42419c2cf4c82649a44dc7a03528f28f7cd9280d4b46._UX667_UY375_SY200_.jpg"
+	},
+	{
+		"dateWatched": 1696305991437,
+		"type": "Movie",
+		"title": "Everything Everywhere All at Once",
+		"episodeTitle": "",
+		"id": "amzn1.dv.gti.9d433401-4b4f-4737-9ec7-ce92e6b313f2",
+		"episodeId": "",
+		"path": "/region/na/detail/0OGS49QMOKJSEBRYHCDSWSP8MQ/ref=atv_set_wh_dp",
+		"episodePath": "",
+		"imageUrl": "https://images-na.ssl-images-amazon.com/images/S/pv-target-images/bba149329b86df530aaa47625125cafd766fc14fde4867e2d067afea0f4faadd._UX667_UY375_SY200_.jpg"
+	}
+]
+```
+
 ### How it Works
 
 Pasting the script into your your browser's console lets it interact with the page and extract watch history like so:
