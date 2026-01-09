@@ -53,30 +53,34 @@
 	})();
 
 	/** Print an informational message to the console */
-	const log = (msg, logFn = console.info, showPrefix = true) => {
-		const prefix = '[Watch History Exporter for Amazon Prime]';
-		const prefixArray = showPrefix ? [`%c${prefix}`, 'color:#1399FF;background:#00050d;font-weight:bold;'] : [];
+	const log = (() => {
+		const prefixArray = [
+			`%c[Watch History Exporter for Amazon Prime]`,
+			'color:#1399FF;background:#00050d;font-weight:bold;',
+		];
 
-		const [doContinue, suffix] = getLogSuffix(
-			(() => {
-				if (logFn !== console.warn) {
-					return undefined;
-				}
+		return (msg, logFn = console.info, showPrefix = true) => {
+			const [doContinue, suffix] = getLogSuffix(
+				(() => {
+					if (logFn !== console.warn) {
+						return undefined;
+					}
 
-				if (OPTION.interactive) {
-					return window.confirm(multiline(prefix, msg));
-				}
+					if (OPTION.interactive) {
+						return window.confirm(multiline(prefix, msg));
+					}
 
-				return true;
-			})(),
-		);
+					return true;
+				})(),
+			);
 
-		logFn(...prefixArray, `${msg}${suffix}`);
+			logFn(...(showPrefix ? prefixArray : []), `${msg}${suffix}`);
 
-		if (doContinue === false) {
-			throw new Error('User cancelled execution');
-		}
-	};
+			if (doContinue === false) {
+				throw new Error('User cancelled execution');
+			}
+		};
+	})();
 
 	/** Join an array of strings with double newlines */
 	const multiline = (...strs) => strs.join('\n\n');
@@ -103,7 +107,7 @@
 	/** Loop through the watch history items and add them to the watchHistoryItems array */
 	const processWatchHistoryItems = (dateSections) => {
 		for (const dateSection of dateSections) {
-			log(dateSection?.date, console.group, false);
+			const logMsgs = [`\t⤷ ${dateSection?.date}`];
 
 			for (const itemOfToday of dateSection.titles) {
 				const title = decodeHtmlEntities(itemOfToday?.title?.text);
@@ -114,18 +118,18 @@
 				if (Array.isArray(itemOfToday.children) && itemOfToday.children.length > 0) {
 					const type = MSG.value.series;
 
-					log(`[${type}] ${title}`, console.group, false);
+					logMsgs.push(`\t\t⤷ [${type}] ${title}`);
 
 					for (const episode of itemOfToday.children) {
 						const episodeTitle = decodeHtmlEntities(episode?.title?.text);
 
-						log(episodeTitle, console.info, false);
+						logMsgs.push(`\t\t\t⤷ ${episodeTitle}`);
 
 						watchHistoryItems.push({
 							dateWatched: toDateTimeString(episode?.time),
 							type,
 							title,
-							episodeTitle: episodeTitle,
+							episodeTitle,
 							id,
 							episodeId: episode?.gti,
 							path,
@@ -134,14 +138,12 @@
 						});
 					}
 
-					console.groupEnd();
-
 					continue;
 				}
 
 				const type = MSG.value.movie;
 
-				log(`[${type}] ${title}`, console.info, false);
+				logMsgs.push(`\t\t⤷ [${type}] ${title}`);
 
 				watchHistoryItems.push({
 					dateWatched: toDateTimeString(itemOfToday?.time),
@@ -156,12 +158,13 @@
 				});
 			}
 
-			console.groupEnd();
+			log(logMsgs.join('\n'), console.debug, false);
 		}
 	};
 
 	/** Processes the watch history items from the given object. Returns true if any watch-history widget was found and processed, otherwise false */
 	const processPotentialWatchHistoryResponse = (obj) => {
+		log('⏳ Processing response...');
 		const widgets = obj?.widgets;
 
 		if (!Array.isArray(widgets)) return false;
@@ -180,11 +183,15 @@
 			}
 		}
 
+		log(`✅ Found ${numOfItemsFound} items`);
+
 		return numOfItemsFound;
 	};
 
 	/** Search the page for a script containing inline watch history data and process it */
 	const findInlineWatchHistory = async () => {
+		log('⏳ Loading inline watch history...');
+
 		const scripts = Array.from(document.body.querySelectorAll('script[type="text/template"]'));
 
 		let numOfItemsInJson = 0;
@@ -215,8 +222,6 @@
 		}
 
 		if (numOfItemsInJson) {
-			log('Found and processed inline watch history', console.info);
-
 			return;
 		}
 
@@ -259,7 +264,7 @@
 
 	/** Force lazy loading of the watch history by scrolling to the bottom of the page */
 	const forceLoadWatchHistory = async () => {
-		log('Loading watch history...');
+		log('⏳ Loading more watch history items...');
 
 		return new Promise((resolve) => {
 			const autoScrollInterval = setInterval(() => {
@@ -269,7 +274,7 @@
 				}
 
 				window.scrollTo(0, document.body.scrollHeight);
-			}, 500);
+			}, 100);
 		});
 	};
 
@@ -285,9 +290,9 @@
 		console.log(
 			[
 				'%c',
-				'👉 GitHub:   https://github.com/sponsors/twocaretcat',
-				'👉 Patreon:  https://patreon.com/twocaretcat',
-				'👉 More:     https://johng.io/funding',
+				'👉 GitHub:  https://github.com/sponsors/twocaretcat',
+				'👉 Patreon: https://patreon.com/twocaretcat',
+				'👉 More:    https://johng.io/funding',
 			].join('\n'),
 			textStyle,
 		);
@@ -306,7 +311,7 @@
 
 	/** Download the watch history as a CSV or JSON file */
 	const downloadFile = () => {
-		log(`Saving ${OPTION.outputJson ? 'JSON' : 'CSV'} file...`, console.group);
+		log(`⏳ Saving ${OPTION.outputJson ? 'JSON' : 'CSV'} file...`, console.group);
 		log(
 			'💡 If you are not prompted to save a file, make sure "Pop-ups and redirects" and "Automatic downloads" are enabled for www.primevideo.com in your browser.',
 			console.info,
@@ -330,7 +335,7 @@
 	};
 
 	// Script entry point
-	log('Script started');
+	log('🚀 Script started');
 
 	await findInlineWatchHistory();
 
@@ -339,5 +344,5 @@
 	await forceLoadWatchHistory();
 
 	downloadFile();
-	log('Script finished');
-})() && 'Script loaded';
+	log('🏁 Script finished');
+})() && '';
