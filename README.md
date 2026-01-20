@@ -110,7 +110,7 @@ strings.
 
 > [!WARNING]
 > Don't scroll down the page before you run the script. Scrolling will cause new items to be loaded before the script is
-> able to see them, meaning there will be missing movie/shows in the output. I recommend reloading the page and then
+> able to see them, meaning there will be missing movies/shows in the output. I recommend reloading the page and then
 > running the script.
 
 **Instructions:**
