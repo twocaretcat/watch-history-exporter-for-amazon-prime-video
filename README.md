@@ -105,10 +105,10 @@ strings.
 
 > [!CAUTION]
 > For security reasons, I do not recommend running scripts from the internet unless you understand what they are doing.
-> If you are not a developer, I recommend reading the comments in the code and/or asking a LLM like [ChatGPT] to explain
-> it to you.
+> If you are not a developer, I recommend reading the comments in the code and/or asking a LLM like [ChatGPT] or [Claude]
+> to explain it to you.
 
-> [!WARNING]
+> [!IMPORTANT]
 > Don't scroll down the page before you run the script. Scrolling will cause new items to be loaded before the script is
 > able to see them, meaning there will be missing movies/shows in the output. I recommend reloading the page and then
 > running the script.
@@ -292,3 +292,4 @@ I appreciate the support!
 [this video]: https://youtu.be/X5uyCtVD1-o?si=AOrzgez90KiDlA-z&t=11
 [Chrome for Developers Blog]: https://developer.chrome.com/blog/self-xss
 [ChatGPT]: https://chatgpt.com/
+[Claude]: https://claude.ai/new
