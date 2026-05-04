@@ -86,21 +86,6 @@ script or resulting file if you wish._
 ]
 ```
 
-### How it Works
-
-Pasting the script into your your browser's console lets it interact with the page and extract watch history like so:
-
-1. The first chunk of watch history data is delivered with the page as a JSON string embedded in a
-   `<script type="text/template">` tag. The script finds and extracts this data and parses it into a JavaScript object
-2. The rest of the watch history is loaded with API calls when you scroll down the page. To get this data, we
-   monkey-patch the built-in `fetch` to listen for responses containing the desired data
-3. To actually make the API calls, we simulate scrolling to the bottom of the page
-4. Once all data is loaded, we construct a CSV file and trigger a download using a data URL
-
-Previous versions of this script parsed the DOM directly, but the data available in the DOM is not as complete and
-adding support for multiple languages requires writing a lot of extra code for handling locale-specific dates and other
-strings.
-
 ## 🕹️ Usage
 
 > [!CAUTION]
@@ -110,7 +95,7 @@ strings.
 
 > [!IMPORTANT]
 > Don't scroll down the page before you run the script. Scrolling will cause new items to be loaded before the script is
-> able to see them, meaning there will be missing movies/shows in the output. I recommend reloading the page and then
+> able to see them, meaning there will be missing movies/shows in the output. I recommend reloading the page first and then
 > running the script.
 
 **Instructions:**
@@ -150,7 +135,7 @@ variable at the top of the script from `true` to `false` to automatically contin
 ### Output Format
 
 > [!NOTE]
-> CSV files have human-readable column names, while JSON files have machine-readable property names.
+> CSV files will have human-readable column names like `Date Watched`, while JSON files will have machine-readable property names like `dateWatched`.
 
 By default, the output is saved as a CSV file. If you prefer JSON, change the `OPTION.outputJson` variable at the top of
 the script from `false` to `true`.
@@ -178,7 +163,7 @@ To do this, change the `OPTION.formatDates` variable at the top of the script fr
 
 ### Custom Delimiters
 
-> [!NOTE]
+> [!WARNING]
 > The default values were chosen because they are compatible and auto-detected by most spreadsheet programs. They have
 > also been tested to make sure things like weird movie titles don't break the output. Changing delimiters has the
 > potential to cause issues.
@@ -204,9 +189,9 @@ on how to:
 - ask questions
 - report security vulnerabilities
 
-Some solutions to common issues are also listed below.
-
 ### FAQ
+
+Some solutions to common issues are listed below.
 
 <details>
   <summary><b>Nothing shows up when I paste in the console / I get a warning when I try to paste in the console</b></summary><br/>
@@ -237,7 +222,7 @@ cut off, it won't work.
 
 If you have a default download folder set, check if the file is there.
 
-Otherwise, make sure "Pop-ups and redirects" and "Automatic downloads" are enabled for <www.primevideo.com> in your
+Otherwise, make sure "Pop-ups and redirects" and "Automatic downloads" are enabled for [www.primevideo.com][Amazon Prime Video] in your
 browser settings.
 
 </details>
@@ -250,13 +235,27 @@ different method to export your watch history than the current version, so it ma
 
 </details>
 
+### How it Works
+
+> [!NOTE]
+> Previous versions of this script parsed the DOM directly, but the data available in the DOM is not as complete as the data from responses. Additionally, a lot of extra code had to be included to handle locale-specific dates and other
+> strings for multi-language support, so we now use this method.
+
+Pasting the script into your your browser's console lets it interact with the page and extract watch history like so:
+
+1. The first chunk of watch history data is delivered with the page as a JSON string embedded in a
+   `<script type="text/template">` tag. The script finds and extracts this data and parses it into a JavaScript object
+2. The rest of the watch history is loaded with API calls when you scroll down the page. To get this data, we
+   monkey-patch the built-in `fetch` to listen for responses containing the desired data
+3. To actually make the API calls, we simulate scrolling to the bottom of the page
+4. Once all data is loaded, we construct a CSV file and trigger a download using a data URL
+
 ## 🤝 Contributing
 
 Want to help out? Pull requests are welcome for:
 
 - feature implementations
 - bug fixes
-- translations
 - documentation
 - tests
 
