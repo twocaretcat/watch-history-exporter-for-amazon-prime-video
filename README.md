@@ -89,9 +89,12 @@ script or resulting file if you wish._
 ## 🕹️ Usage
 
 > [!CAUTION]
-> For security reasons, I do not recommend running scripts from the internet unless you understand what they are doing.
-> If you are not a developer, I recommend reading the comments in the code and/or asking a LLM like [ChatGPT] or [Claude]
+> For security reasons, I do not recommend running scripts from the internet unless you understand what they are doing. If you are not a developer, I recommend reading the comments in the code and/or asking a LLM like [ChatGPT] or [Claude]
 > to explain it to you.
+>
+> I'd recommend reading [Amazon's TOS](https://www.amazon.com/gp/help/customer/display.html?nodeId=GM687PUA9S52N732) to make sure you are not violating any rules by using this script.
+>
+> If you don't mind waiting and/or getting your data in a different format, you can now also [request your watch history from Amazon themselves](https://www.amazon.com/hz/privacy-central/data-requests/preview.html#:~:text=Submit%20Request-,Prime%20Video).
 
 > [!IMPORTANT]
 > Don't scroll down the page before you run the script. Scrolling will cause new items to be loaded before the script is
